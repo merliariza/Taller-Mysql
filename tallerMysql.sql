@@ -1,0 +1,95 @@
+--Normalización
+--1. Crear una tabla HistorialPedidos que almacene cambios en los pedidos.
+--2. Evaluar la tabla Clientes para eliminar datos redundantes y normalizar hasta 3NF.
+--3. Separar la tabla Empleados en una tabla de DatosEmpleados y otra para Puestos .
+--4. Revisar la relación Clientes y UbicacionCliente para evitar duplicación de datos.
+--5. Normalizar Proveedores para tener ContactoProveedores en otra tabla.
+--6. Crear una tabla de Telefonos para almacenar múltiples números por cliente.
+--7. Transformar TiposProductos en una relación categórica jerárquica.
+--8. Normalizar Pedidos y DetallesPedido para evitar inconsistencias de precios.
+--9. Usar una relación de muchos a muchos para Empleados y Proveedores .
+--10. Convertir la tabla UbicacionCliente en una relación genérica de Ubicaciones .
+
+--Joins
+--1. Obtener la lista de todos los pedidos con los nombres de clientes usando INNER JOIN .
+--2. Listar los productos y proveedores que los suministran con INNER JOIN .
+--3. Mostrar los pedidos y las ubicaciones de los clientes con LEFT JOIN .
+--4. Consultar los empleados que han registrado pedidos, incluyendo empleados sin pedidos( LEFT JOIN ).
+--5. Obtener el tipo de producto y los productos asociados con INNER JOIN .
+--6. Listar todos los clientes y el número de pedidos realizados con COUNT y GROUP BY .
+--7. Combinar Pedidos y Empleados para mostrar qué empleados gestionaron pedidos específicos.
+--8. Mostrar productos que no han sido pedidos ( RIGHT JOIN ).
+--9. Mostrar el total de pedidos y ubicación de clientes usando múltiples JOIN .
+--10. Unir Proveedores , Productos , y TiposProductos para un listado completo de inventario.
+
+--Consultas Simples
+--1. Seleccionar todos los productos con precio mayor a $50.
+--2. Consultar clientes registrados en una ciudad específica.
+--3. Mostrar empleados contratados en los últimos 2 años.
+--4. Seleccionar proveedores que suministran más de 5 productos.
+--5. Listar clientes que no tienen dirección registrada en UbicacionCliente .
+--6. Calcular el total de ventas por cada cliente.
+--7. Mostrar el salario promedio de los empleados.
+--8. Consultar el tipo de productos disponibles en TiposProductos .
+--9. Seleccionar los 3 productos más caros.
+--10. Consultar el cliente con el mayor número de pedidos.
+
+--Consultas Multitabla
+--1. Listar todos los pedidos y el cliente asociado.
+--2. Mostrar la ubicación de cada cliente en sus pedidos.
+--3. Listar productos junto con el proveedor y tipo de producto.
+--4. Consultar todos los empleados que gestionan pedidos de clientes en una ciudad específica.
+--5. Consultar los 5 productos más vendidos.
+--6. Obtener la cantidad total de pedidos por cliente y ciudad.
+--7. Listar clientes y proveedores en la misma ciudad.
+--8. Mostrar el total de ventas agrupado por tipo de producto.
+--9. Listar empleados que gestionan pedidos de productos de un proveedor específico.
+--10. Obtener el ingreso total de cada proveedor a partir de los productos vendidos.
+
+-- Subconsultas
+--1. Consultar el producto más caro en cada categoría.
+--2. Encontrar el cliente con mayor total en pedidos.
+--3. Listar empleados que ganan más que el salario promedio.
+--4. Consultar productos que han sido pedidos más de 5 veces.
+--5. Listar pedidos cuyo total es mayor al promedio de todos los pedidos.
+--6. Seleccionar los 3 proveedores con más productos.
+--7. Consultar productos con precio superior al promedio en su tipo.
+--8. Mostrar clientes que han realizado más pedidos que la media.
+--9. Encontrar productos cuyo precio es mayor que el promedio de todos los productos.
+--10. Mostrar empleados cuyo salario es menor al promedio del departamento.
+
+--Procedimientos Almacenados
+--1. Crear un procedimiento para actualizar el precio de todos los productos de un proveedor.
+--2. Un procedimiento que devuelva la dirección de un cliente por ID.
+--3. Crear un procedimiento que registre un pedido nuevo y sus detalles.
+--4. Un procedimiento para calcular el total de ventas de un cliente.
+--5. Crear un procedimiento para obtener los empleados por puesto.
+--6. Un procedimiento que actualice el salario de empleados por puesto.
+--7. Crear un procedimiento que liste los pedidos entre dos fechas.
+--8. Un procedimiento para aplicar un descuento a productos de una categoría.
+--9. Crear un procedimiento que liste todos los proveedores de un tipo de producto.
+--10. Un procedimiento que devuelva el pedido de mayor valor.
+
+--Funciones Definidas por el Usuario
+--1. Crear una función que reciba una fecha y devuelva los días transcurridos.
+--2. Crear una función para calcular el total con impuesto de un monto.
+--3. Una función que devuelva el total de pedidos de un cliente específico.
+--4. Crear una función para aplicar un descuento a un producto.
+--5. Una función que indique si un cliente tiene dirección registrada.
+--6. Crear una función que devuelva el salario anual de un empleado.
+--7. Una función para calcular el total de ventas de un tipo de producto.
+--8. Crear una función para devolver el nombre de un cliente por ID.
+--9. Una función que reciba el ID de un pedido y devuelva su total.
+--10. Crear una función que indique si un producto está en inventario.
+
+--Triggers
+--1. Crear un trigger que registre en HistorialSalarios cada cambio de salario de empleados.
+--2. Crear un trigger que evite borrar productos con pedidos activos.
+--3. Un trigger que registre en HistorialPedidos cada actualización en Pedidos .
+--4. Crear un trigger que actualice el inventario al registrar un pedido.
+--5. Un trigger que evite actualizaciones de precio a menos de $1.
+--6. Crear un trigger que registre la fecha de creación de un pedido en HistorialPedidos .
+--7. Un trigger que mantenga el precio total de cada pedido en Pedidos .
+--8. Crear un trigger para validar que UbicacionCliente no esté vacío al crear un cliente.
+--9. Un trigger que registre en LogActividades cada modificación en Proveedores .
+--10. Crear un trigger que registre en HistorialContratos cada cambio en Empleados .
