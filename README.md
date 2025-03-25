@@ -878,6 +878,8 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+UPDATE Puestos SET salario_base = salario_base + 100 WHERE id = 1;
+SELECT id, puesto_id, salario_anterior, salario_nuevo, fecha_cambio FROM HistorialSalarios;
 ```
 
 2. Crear un trigger que evite borrar productos con pedidos activos.
@@ -894,6 +896,7 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+DELETE FROM Productos WHERE id = 1;
 ```
 
 3. Un trigger que registre en HistorialPedidos cada actualización en Pedidos .
@@ -907,6 +910,8 @@ BEGIN
     VALUES (NEW.id, 'Actualizado', NOW());
 END //
 DELIMITER ;
+UPDATE Pedidos SET total = total + 10 WHERE id = 1;
+SELECT id, pedido_id, fecha_modificacion, estado, comentario FROM HistorialPedidos WHERE pedido_id = 1 ORDER BY fecha_modificacion DESC;
 ```
 
 4. Crear un trigger que actualice el inventario al registrar un pedido.
@@ -921,6 +926,8 @@ BEGIN
     WHERE producto_id = NEW.producto_id;
 END //
 DELIMITER ;
+INSERT INTO DetallesPedido (pedido_id, producto_id, cantidad, precio_unitario) VALUES (1, 1, 2, 50);
+SELECT id, producto_id, cantidad FROM Inventario WHERE producto_id = 1;
 ```
 
 5. Un trigger que evite actualizaciones de precio a menos de $1.
@@ -935,6 +942,7 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+UPDATE Productos SET precio = 0.5 WHERE id = 1;
 ```
 
 6. Crear un trigger que registre la fecha de creación de un pedido en HistorialPedidos .
@@ -948,6 +956,8 @@ BEGIN
     VALUES (NEW.id, 'Creado', NOW());
 END //
 DELIMITER ;
+INSERT INTO Pedidos (id, cliente_id, total) VALUES (2, 1, 200);
+SELECT id, pedido_id, fecha_modificacion, estado, comentario FROM HistorialPedidos WHERE pedido_id = 2;
 ```
 
 7. Un trigger que mantenga el precio total de cada pedido en Pedidos .
@@ -967,6 +977,8 @@ BEGIN
     WHERE id = NEW.pedido_id;
 END //
 DELIMITER ;
+INSERT INTO DetallesPedido (pedido_id, producto_id, cantidad, precio_unitario) VALUES (1, 2, 3, 30);
+SELECT total FROM Pedidos WHERE id = 1;
 ```
 
 8. Crear un trigger para validar que UbicacionCliente no esté vacío al crear un cliente.
@@ -986,6 +998,7 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+INSERT INTO Clientes (id, nombre) VALUES (3, 'Nuevo Cliente');
 ```
 
 9. Un trigger que registre en LogActividades cada modificación en Proveedores .
@@ -999,6 +1012,8 @@ BEGIN
     VALUES ('Proveedores', 'Actualización', NEW.id, NOW());
 END //
 DELIMITER ;
+UPDATE Proveedores SET nombre = 'Proveedor Modificado' WHERE id = 1;
+SELECT id, tabla, accion, entidad_id, fecha FROM LogActividades WHERE tabla = 'Proveedores';
 ```
 
 10. Crear un trigger que registre en HistorialContratos cada cambio en Empleados .
@@ -1014,4 +1029,6 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+UPDATE DatosEmpleados SET puesto_id = 2 WHERE id = 1;
+SELECT id, tabla, accion, entidad_id, fecha FROM HistorialContratos WHERE empleado_id = 1;
 ```
