@@ -29,6 +29,11 @@ INSERT INTO Ubicaciones (entidad, entidad_id, direccion, ciudad, estado, codigo_
 ('Cliente', 3, 'Calle3', 'Bucaramanga', 'Santander', '680003', 'Colombia'),
 ('Cliente', 4, 'Calle4', 'Bucaramanga', 'Santander', '680004', 'Colombia'),
 ('Cliente', 5, 'Calle5', 'Bucaramanga', 'Santander', '680005', 'Colombia'),
+('Cliente', 6, 'Calle11', 'Floridablanca', 'Santander', '680011', 'Colombia'),
+('Cliente', 7, 'Calle12', 'Floridablanca', 'Santander', '680012', 'Colombia'),
+('Cliente', 8, 'Calle13', 'Floridablanca', 'Santander', '680013', 'Colombia'),
+('Cliente', 9, 'Calle14', 'Floridablanca', 'Santander', '680014', 'Colombia'),
+('Cliente', 10, 'Calle15', 'Floridablanca', 'Santander', '680015', 'Colombia'),
 ('Proveedor', 1, 'Calle6', 'Bucaramanga', 'Santander', '680006', 'Colombia'),
 ('Proveedor', 2, 'Calle7', 'Bucaramanga', 'Santander', '680007', 'Colombia'),
 ('Proveedor', 3, 'Calle8', 'Bucaramanga', 'Santander', '680008', 'Colombia'),
@@ -97,10 +102,10 @@ INSERT INTO ContactoProveedores (proveedor_id, nombre, telefono, email) VALUES
 (10, 'Gloria López', '3198765432', 'gloria@gmail.com');
 
 INSERT INTO TiposProductos (tipo_nombre, descripcion, parent_id) VALUES 
-('Electrónica', 'Productos electrónicos', NULL),
-('Informática', 'Equipos informáticos', NULL),
-('Hogar', 'Productos para casa', NULL),
-('Oficina', 'Material de oficina', NULL),
+('Electrónica', 'Productos electrónicos', 1),
+('Informática', 'Equipos informáticos', 1),
+('Hogar', 'Productos para casa', 3),
+('Oficina', 'Material de oficina', 3),
 ('Móviles', 'Teléfonos móviles', 1),
 ('Portátiles', 'Ordenadores portátiles', 2),
 ('Electrodomésticos', 'Aparatos para el hogar', 3),
@@ -151,7 +156,7 @@ INSERT INTO DetallesPedido (pedido_id, producto_id, cantidad, precio_unitario, s
 (1, 1, 1, 699000, 699000),
 (2, 2, 1, 1299000, 1299000),
 (3, 3, 1, 899000, 899000),
-(4, 4, 1, 249000, 249000),
+(4, 4, 7, 249000, 174300),
 (5, 5, 1, 499000, 499000),
 (6, 6, 1, 179000, 179000),
 (7, 7, 1, 799000, 799000),
@@ -197,3 +202,27 @@ INSERT INTO EmpleadoProveedor (empleado_id, proveedor_id) VALUES
 (8, 8),
 (9, 9),
 (10, 10);
+
+INSERT INTO HistorialSalarios (puesto_id, salario_anterior, salario_nuevo, fecha_cambio) VALUES
+(1, 450000, 500000, '2024-03-15 10:00:00'),
+(2, 320000, 350000, '2024-03-20 15:30:00');
+
+INSERT INTO Inventario (producto_id, cantidad) VALUES 
+(1, 15),
+(2, 40),
+(3, 30),
+(4, 25),
+(5, 15),
+(6, 40),
+(7, 30),
+(8, 25),
+(9, 15),
+(10, 40);
+
+INSERT INTO LogActividades (tabla, accion, entidad_id, fecha) VALUES
+('Cliente', 'Inserción', 2, '2024-03-10 14:20:00'),
+('Proveedor', 'Eliminación', 3, '2024-03-30 10:45:00');
+
+INSERT INTO HistorialContratos (empleado_id, puesto_anterior, puesto_nuevo, fecha_cambio) VALUES
+(1, 2, 1, '2024-04-01 09:00:00'), 
+(2, 1, 2, '2024-04-05 14:30:00');

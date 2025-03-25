@@ -131,6 +131,43 @@ CREATE TABLE EmpleadoProveedor (
     FOREIGN KEY (proveedor_id) REFERENCES Proveedores(id)
 );
 
+-- Tabla HistorialSalarios
+CREATE TABLE HistorialSalarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    puesto_id INT,
+    salario_anterior DECIMAL(10,2),
+    salario_nuevo DECIMAL(10,2),
+    fecha_cambio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (puesto_id) REFERENCES Puestos(id) ON DELETE CASCADE
+);
+
+-- Tabla Inventario
+CREATE TABLE Inventario (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    producto_id INT,
+    cantidad INT NOT NULL,
+    FOREIGN KEY (producto_id) REFERENCES Productos(id)
+);
+
+-- Tabla LogActividades
+CREATE TABLE LogActividades (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    tabla VARCHAR(50) NOT NULL,
+    accion VARCHAR(50) NOT NULL,
+    entidad_id INT NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla HistorialContratos
+CREATE TABLE HistorialContratos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    empleado_id INT NOT NULL,
+    puesto_anterior INT NOT NULL,
+    puesto_nuevo INT NOT NULL,
+    fecha_cambio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (empleado_id) REFERENCES DatosEmpleados(id) ON DELETE CASCADE
+);
+
 --Joins
 --1. Obtener la lista de todos los pedidos con los nombres de clientes usando INNER JOIN .
 SELECT p.id AS pedido_id, p.fecha, p.total, c.nombre AS cliente
@@ -406,6 +443,8 @@ BEGIN
     WHERE proveedor_id = proveedor_id;
 END //
 DELIMITER ;
+CALL actualizar_precios_proveedor(1, 10);
+SELECT id, nombre, precio, proveedor_id, tipo_id FROM Productos WHERE proveedor_id = 1;
 
 --2. Un procedimiento que devuelva la dirección de un cliente por ID.
 DELIMITER //
@@ -416,6 +455,7 @@ BEGIN
     WHERE entidad = 'Cliente' AND entidad_id = cliente_id;
 END //
 DELIMITER ;
+CALL obtener_direccion_cliente(3);
 
 --3. Crear un procedimiento que registre un pedido nuevo y sus detalles.
 DELIMITER //
@@ -444,6 +484,10 @@ BEGIN
     VALUES (pedido_id, 'Creado');
 END //
 DELIMITER ;
+CALL registrar_pedido(2, 5, 3);
+SELECT id, cliente_id, fecha, total FROM Pedidos ORDER BY id DESC LIMIT 1;
+SELECT id, pedido_id, producto_id, cantidad, precio_unitario, subtotal FROM DetallesPedido ORDER BY pedido_id DESC LIMIT 1;
+SELECT id, pedido_id, fecha_modificacion, estado, comentario FROM HistorialPedidos ORDER BY pedido_id DESC LIMIT 1;
 
 --4. Un procedimiento para calcular el total de ventas de un cliente.
 DELIMITER //
@@ -454,6 +498,9 @@ BEGIN
     WHERE cliente_id = cliente_id;
 END //
 DELIMITER ;
+SET @total = 0;
+CALL total_ventas_cliente(2, @total);
+SELECT @total;
 
 --5. Crear un procedimiento para obtener los empleados por puesto.
 DELIMITER //
@@ -465,6 +512,7 @@ BEGIN
     WHERE p.nombre = puesto_nombre;
 END //
 DELIMITER ;
+CALL empleados_por_puesto('Gerente');
 
 --6. Un procedimiento que actualice el salario de empleados por puesto.
 DELIMITER //
@@ -478,6 +526,8 @@ BEGIN
     WHERE nombre = puesto_nombre;
 END //
 DELIMITER ;
+CALL actualizar_salarios_puesto('Vendedor', 5);
+SELECT id, nombre, salario_base FROM Puestos WHERE nombre = 'Vendedor';
 
 --7. Crear un procedimiento que liste los pedidos entre dos fechas.
 DELIMITER //
@@ -489,6 +539,7 @@ BEGIN
     WHERE p.fecha BETWEEN fecha_inicio AND fecha_fin;
 END //
 DELIMITER ;
+CALL pedidos_entre_fechas('2024-01-01', '2024-12-31');
 
 --8. Un procedimiento para aplicar un descuento a productos de una categoría.
 DELIMITER //
@@ -501,6 +552,8 @@ BEGIN
     WHERE tipo_id = tipo_id;
 END //
 DELIMITER ;
+CALL aplicar_descuento_categoria(3, 15);
+SELECT id, nombre, precio FROM Productos WHERE tipo_id = 3;
 
 --9. Crear un procedimiento que liste todos los proveedores de un tipo de producto.
 DELIMITER //
@@ -513,6 +566,7 @@ BEGIN
     WHERE tp.tipo_nombre = tipo_nombre;
 END //
 DELIMITER ;
+CALL proveedores_por_tipo('Electrónica');
 
 --10. Un procedimiento que devuelva el pedido de mayor valor.
 DELIMITER //
@@ -524,6 +578,7 @@ BEGIN
     ORDER BY p.total DESC LIMIT 1;
 END //
 DELIMITER ;
+CALL pedido_mayor_valor();
 
 --Funciones Definidas por el Usuario
 --1. Crear una función que reciba una fecha y devuelva los días transcurridos.
@@ -534,6 +589,7 @@ BEGIN
     RETURN DATEDIFF(CURDATE(), fecha);
 END //
 DELIMITER ;
+SELECT dias_transcurridos('2024-01-01') AS Dias_Transcurridos;
 
 --2. Crear una función para calcular el total con impuesto de un monto.
 DELIMITER //
@@ -544,6 +600,7 @@ BEGIN
     RETURN monto * (1 + tasa / 100);
 END //
 DELIMITER ;
+SELECT calcular_total_con_impuesto(100, 15) AS Total_Con_Impuesto;
 
 --3. Una función que devuelva el total de pedidos de un cliente específico.
 DELIMITER //
@@ -555,6 +612,7 @@ BEGIN
     RETURN total;
 END //
 DELIMITER ;
+SELECT total_pedidos_cliente(1) AS Total_Pedidos;
 
 --4. Crear una función para aplicar un descuento a un producto.
 DELIMITER //
@@ -565,6 +623,7 @@ BEGIN
     RETURN precio_original * (1 - descuento / 100);
 END //
 DELIMITER ;
+SELECT aplicar_descuento(200, 10) AS Precio_Con_Descuento;
 
 --5. Una función que indique si un cliente tiene dirección registrada.
 DELIMITER //
@@ -577,6 +636,7 @@ BEGIN
     RETURN existe > 0;
 END //
 DELIMITER ;
+SELECT tiene_direccion(1) AS Tiene_Direccion;
 
 --6. Crear una función que devuelva el salario anual de un empleado.
 DELIMITER //
@@ -591,6 +651,7 @@ BEGIN
     RETURN salario;
 END //
 DELIMITER ;
+SELECT salario_anual(3) AS Salario_Anual;
 
 --7. Una función para calcular el total de ventas de un tipo de producto.
 DELIMITER //
@@ -605,6 +666,7 @@ BEGIN
     RETURN IFNULL(total, 0);
 END //
 DELIMITER ;
+SELECT ventas_por_tipo(2) AS Total_Ventas;
 
 --8. Crear una función para devolver el nombre de un cliente por ID.
 DELIMITER //
@@ -616,6 +678,7 @@ BEGIN
     RETURN nombre_cliente;
 END //
 DELIMITER ;
+SELECT nombre_cliente(5) AS Nombre_Cliente;
 
 --9. Una función que reciba el ID de un pedido y devuelva su total.
 DELIMITER //
@@ -627,6 +690,7 @@ BEGIN
     RETURN total;
 END //
 DELIMITER ;
+SELECT total_pedido(10) AS Total_Pedido;
 
 --10. Crear una función que indique si un producto está en inventario.
 DELIMITER //
@@ -638,6 +702,7 @@ BEGIN
     RETURN existe > 0;
 END //
 DELIMITER ;
+SELECT producto_en_inventario(8) AS Producto_En_Inventario;
 
 --Triggers
 --1. Crear un trigger que registre en HistorialSalarios cada cambio de salario de empleados.
