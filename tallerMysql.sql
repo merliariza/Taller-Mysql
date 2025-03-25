@@ -852,3 +852,167 @@ END //
 DELIMITER ;
 UPDATE DatosEmpleados SET puesto_id = 2 WHERE id = 1;
 SELECT id, empleado_id, puesto_anterior, puesto_nuevo, fecha_cambio FROM HistorialContratos WHERE empleado_id = 1;
+
+-- Función para calcular el descuento por categoría "Electrónica"
+DELIMITER $$
+CREATE FUNCTION CalcularDescuento(tipo_id INT, precio DECIMAL(10,2)) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE descuento DECIMAL(10,2);
+    IF (SELECT tipo_nombre FROM TiposProductos WHERE id = tipo_id) = 'Electrónica' THEN
+        SET descuento = precio * 0.90;
+    ELSE
+        SET descuento = precio;
+    END IF;
+    RETURN descuento;
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar productos con precio y descuento
+SELECT nombre, precio, CalcularDescuento(tipo_id, precio) AS precio_con_descuento FROM Productos;
+
+-- Función para calcular la edad de un cliente
+DELIMITER $$
+CREATE FUNCTION CalcularEdad(fecha_nacimiento DATE) RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE());
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar clientes mayores de 18 años
+SELECT nombre FROM Clientes WHERE CalcularEdad(fecha_nacimiento) >= 18;
+
+-- Función para calcular el impuesto sobre el precio del producto
+DELIMITER $$
+CREATE FUNCTION CalcularImpuesto(precio DECIMAL(10,2)) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN precio * 1.15;
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar productos con precio e impuesto
+SELECT nombre, precio, CalcularImpuesto(precio) AS precio_final FROM Productos;
+
+-- Función para calcular el total de pedidos de un cliente
+DELIMITER $$
+CREATE FUNCTION TotalPedidosCliente(cliente_id INT) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total DECIMAL(10,2);
+    SELECT SUM(total) INTO total FROM Pedidos WHERE cliente_id = cliente_id;
+    RETURN IFNULL(total, 0);
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar clientes con total de pedidos mayor a $1000
+SELECT c.nombre, TotalPedidosCliente(c.id) AS total_pedidos 
+FROM Clientes c
+HAVING total_pedidos > 1000;
+
+-- Función para calcular el salario anual
+DELIMITER $$
+CREATE FUNCTION SalarioAnual(salario_base DECIMAL(10,2)) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN salario_base * 12;
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar empleados con salario anual mayor a $50,000
+SELECT nombre, SalarioAnual(salario_base) AS salario_anual
+FROM DatosEmpleados e
+JOIN Puestos p ON e.puesto_id = p.id
+HAVING salario_anual > 50000;
+
+-- Función para calcular bonificación
+DELIMITER $$
+CREATE FUNCTION Bonificacion(salario DECIMAL(10,2)) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN salario * 1.10;
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar salario ajustado
+SELECT nombre, salario_base, Bonificacion(salario_base) AS salario_ajustado
+FROM DatosEmpleados e
+JOIN Puestos p ON e.puesto_id = p.id;
+
+-- Función para calcular días desde el último pedido
+DELIMITER $$
+CREATE FUNCTION DiasDesdeUltimoPedido(cliente_id INT) RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE dias INT;
+    SELECT DATEDIFF(CURDATE(), MAX(fecha)) INTO dias FROM Pedidos WHERE cliente_id = cliente_id;
+    RETURN IFNULL(dias, NULL);
+END $$
+DELIMITER ;
+
+-- Consulta para clientes con pedidos en los últimos 30 días
+SELECT nombre FROM Clientes WHERE DiasDesdeUltimoPedido(id) <= 30;
+
+-- Función para calcular el total en inventario
+DELIMITER $$
+CREATE FUNCTION TotalInventarioProducto(producto_id INT) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total DECIMAL(10,2);
+    SELECT cantidad * precio INTO total FROM Inventario i JOIN Productos p ON i.producto_id = p.id WHERE producto_id = producto_id;
+    RETURN IFNULL(total, 0);
+END $$
+DELIMITER ;
+
+-- Consulta para mostrar productos con inventario superior a $500
+SELECT nombre, TotalInventarioProducto(id) AS total_inventario 
+FROM Productos
+HAVING total_inventario > 500;
+
+-- Creación de tabla de historial de precios
+CREATE TABLE HistorialPrecios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    producto_id INT,
+    precio_anterior DECIMAL(10,2),
+    precio_nuevo DECIMAL(10,2),
+    fecha_cambio DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (producto_id) REFERENCES Productos(id)
+);
+
+-- Trigger para registrar cambios de precio
+DELIMITER $$
+CREATE TRIGGER RegistroCambioPrecio
+BEFORE UPDATE ON Productos
+FOR EACH ROW
+BEGIN
+    IF OLD.precio <> NEW.precio THEN
+        INSERT INTO HistorialPrecios (producto_id, precio_anterior, precio_nuevo)
+        VALUES (OLD.id, OLD.precio, NEW.precio);
+    END IF;
+END $$
+DELIMITER ;
+
+-- Procedimiento para reporte de ventas mensuales por empleado
+DELIMITER $$
+CREATE PROCEDURE ReporteVentasMensuales(IN mes INT, IN anio INT)
+BEGIN
+    SELECT e.nombre, SUM(p.total) AS total_ventas
+    FROM Pedidos p
+    JOIN DatosEmpleados e ON e.id = p.cliente_id
+    WHERE MONTH(p.fecha) = mes AND YEAR(p.fecha) = anio
+    GROUP BY e.id;
+END $$
+DELIMITER ;
+
+-- Subconsulta para obtener el producto más vendido por cada proveedor
+SELECT p.nombre AS proveedor, 
+       (SELECT pr.nombre FROM Productos pr 
+        JOIN DetallesPedido dp ON pr.id = dp.producto_id 
+        WHERE pr.proveedor_id = p.id 
+        GROUP BY pr.id ORDER BY SUM(dp.cantidad) DESC LIMIT 1) AS producto_mas_vendido,
+       (SELECT SUM(dp.cantidad) FROM DetallesPedido dp
+        JOIN Productos pr ON dp.producto_id = pr.id
+        WHERE pr.proveedor_id = p.id 
+        GROUP BY pr.id ORDER BY SUM(dp.cantidad) DESC LIMIT 1) AS cantidad_vendida
+FROM Proveedores p;
