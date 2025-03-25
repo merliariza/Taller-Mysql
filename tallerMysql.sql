@@ -684,7 +684,6 @@ CREATE TRIGGER actualizar_inventario
 AFTER INSERT ON DetallesPedido
 FOR EACH ROW
 BEGIN
-    -- Asumiendo que hay una tabla Inventario
     UPDATE Inventario 
     SET cantidad = cantidad - NEW.cantidad
     WHERE producto_id = NEW.producto_id;

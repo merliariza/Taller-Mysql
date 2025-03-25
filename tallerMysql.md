@@ -1,15 +1,22 @@
---Normalización
--- Creación de la base de datos
+# Solución taller MySQL
+
+## Normalización
+ Creación de la base de datos
+```sql
 CREATE DATABASE vtaszfs;
 USE vtaszfs;
+```
 
--- Tabla Clientes
+ Tabla Clientes
+```sql
 CREATE TABLE Clientes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100)
 );
+```
 
--- Tabla ContactosClientes
+ Tabla ContactosClientes
+```sql
 CREATE TABLE ContactosClientes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cliente_id INT,
@@ -17,8 +24,10 @@ CREATE TABLE ContactosClientes (
     tipo VARCHAR(20),
     FOREIGN KEY (cliente_id) REFERENCES Clientes(id)
 );
+```
 
--- Tabla Ubicaciones
+ Tabla Ubicaciones
+```sql
 CREATE TABLE Ubicaciones (
     id INT PRIMARY KEY AUTO_INCREMENT,
     entidad VARCHAR(50),
@@ -29,8 +38,10 @@ CREATE TABLE Ubicaciones (
     codigo_postal VARCHAR(10),
     pais VARCHAR(50)
 );
+```
 
--- Tabla Telefonos
+ Tabla Telefonos
+```sql
 CREATE TABLE Telefonos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cliente_id INT,
@@ -38,15 +49,19 @@ CREATE TABLE Telefonos (
     tipo VARCHAR(20),
     FOREIGN KEY (cliente_id) REFERENCES Clientes(id)
 );
+```
 
--- Tabla Puestos
+ Tabla Puestos
+```sql
 CREATE TABLE Puestos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50),
     salario_base DECIMAL(10,2)
 );
+```
 
--- Tabla DatosEmpleados
+ Tabla DatosEmpleados
+```sql
 CREATE TABLE DatosEmpleados (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100),
@@ -54,14 +69,18 @@ CREATE TABLE DatosEmpleados (
     fecha_contratacion DATE,
     FOREIGN KEY (puesto_id) REFERENCES Puestos(id)
 );
+```
 
--- Tabla Proveedores
+ Tabla Proveedores
+```sql
 CREATE TABLE Proveedores (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100)
 );
+```
 
--- Tabla ContactoProveedores
+ Tabla ContactoProveedores
+```sql
 CREATE TABLE ContactoProveedores (
     id INT PRIMARY KEY AUTO_INCREMENT,
     proveedor_id INT,
@@ -70,8 +89,10 @@ CREATE TABLE ContactoProveedores (
     email VARCHAR(100) UNIQUE,
     FOREIGN KEY (proveedor_id) REFERENCES Proveedores(id)
 );
+```
 
--- Tabla TiposProductos
+ Tabla TiposProductos
+```sql
 CREATE TABLE TiposProductos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     tipo_nombre VARCHAR(100),
@@ -79,8 +100,10 @@ CREATE TABLE TiposProductos (
     parent_id INT NULL,
     FOREIGN KEY (parent_id) REFERENCES TiposProductos(id)
 );
+```
 
--- Tabla Productos
+ Tabla Productos
+```sql
 CREATE TABLE Productos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100),
@@ -90,8 +113,10 @@ CREATE TABLE Productos (
     FOREIGN KEY (proveedor_id) REFERENCES Proveedores(id),
     FOREIGN KEY (tipo_id) REFERENCES TiposProductos(id)
 );
+```
 
--- Tabla Pedidos
+ Tabla Pedidos
+```sql
 CREATE TABLE Pedidos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cliente_id INT,
@@ -99,8 +124,10 @@ CREATE TABLE Pedidos (
     total DECIMAL(10, 2),
     FOREIGN KEY (cliente_id) REFERENCES Clientes(id)
 );
+```
 
--- Tabla DetallesPedido
+ Tabla DetallesPedido
+```sql
 CREATE TABLE DetallesPedido (
     id INT PRIMARY KEY AUTO_INCREMENT,
     pedido_id INT,
@@ -111,8 +138,10 @@ CREATE TABLE DetallesPedido (
     FOREIGN KEY (pedido_id) REFERENCES Pedidos(id),
     FOREIGN KEY (producto_id) REFERENCES Productos(id)
 );
+```
 
--- Tabla HistorialPedidos
+ Tabla HistorialPedidos
+```sql
 CREATE TABLE HistorialPedidos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     pedido_id INT,
@@ -121,8 +150,10 @@ CREATE TABLE HistorialPedidos (
     comentario TEXT,
     FOREIGN KEY (pedido_id) REFERENCES Pedidos(id)
 );
+```
 
--- Tabla EmpleadoProveedor
+ Tabla EmpleadoProveedor
+```sql
 CREATE TABLE EmpleadoProveedor (
     id INT PRIMARY KEY AUTO_INCREMENT,
     empleado_id INT,
@@ -130,174 +161,232 @@ CREATE TABLE EmpleadoProveedor (
     FOREIGN KEY (empleado_id) REFERENCES DatosEmpleados(id),
     FOREIGN KEY (proveedor_id) REFERENCES Proveedores(id)
 );
+```
 
---Joins
---1. Obtener la lista de todos los pedidos con los nombres de clientes usando INNER JOIN .
+## Joins
+1. Obtener la lista de todos los pedidos con los nombres de clientes usando INNER JOIN .
+```sql
 SELECT p.id AS pedido_id, p.fecha, p.total, c.nombre AS cliente
 FROM Pedidos p
 INNER JOIN Clientes c ON p.cliente_id = c.id;
+```
 
---2. Listar los productos y proveedores que los suministran con INNER JOIN .
+2. Listar los productos y proveedores que los suministran con INNER JOIN .
+```sql
 SELECT pr.nombre AS producto, pv.nombre AS proveedor
 FROM Productos pr
 INNER JOIN Proveedores pv ON pr.proveedor_id = pv.id;
+```
 
---3. Mostrar los pedidos y las ubicaciones de los clientes con LEFT JOIN .
+3. Mostrar los pedidos y las ubicaciones de los clientes con LEFT JOIN .
+```sql
 SELECT p.id AS pedido_id, c.nombre AS cliente, u.direccion, u.ciudad, u.estado
 FROM Pedidos p
 LEFT JOIN Clientes c ON p.cliente_id = c.id
 LEFT JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id;
+```
 
---4. Consultar los empleados que han registrado pedidos, incluyendo empleados sin pedidos( LEFT JOIN ).
+4. Consultar los empleados que han registrado pedidos, incluyendo empleados sin pedidos( LEFT JOIN ).
+```sql
 SELECT e.nombre AS empleado, COUNT(p.id) AS total_pedidos
 FROM DatosEmpleados e
 LEFT JOIN Pedidos p ON e.id = p.cliente_id
 GROUP BY e.nombre;
+```
 
---5. Obtener el tipo de producto y los productos asociados con INNER JOIN .
+5. Obtener el tipo de producto y los productos asociados con INNER JOIN .
+```sql
 SELECT t.tipo_nombre AS tipo, p.nombre AS producto
 FROM Productos p
 INNER JOIN TiposProductos t ON p.tipo_id = t.id;
+```
 
---6. Listar todos los clientes y el número de pedidos realizados con COUNT y GROUP BY .
+6. Listar todos los clientes y el número de pedidos realizados con COUNT y GROUP BY .
+```sql
 SELECT c.nombre AS cliente, COUNT(p.id) AS total_pedidos
 FROM Clientes c
 LEFT JOIN Pedidos p ON c.id = p.cliente_id
 GROUP BY c.nombre;
+```
 
---7. Combinar Pedidos y Empleados para mostrar qué empleados gestionaron pedidos específicos.
+7. Combinar Pedidos y Empleados para mostrar qué empleados gestionaron pedidos específicos.
+```sql
 SELECT p.id AS pedido_id, e.nombre AS empleado
 FROM Pedidos p
 JOIN DatosEmpleados e ON p.cliente_id = e.id;
+```
 
---8. Mostrar productos que no han sido pedidos ( RIGHT JOIN ).
+8. Mostrar productos que no han sido pedidos ( RIGHT JOIN ).
+```sql
 SELECT p.nombre AS producto_no_pedido
 FROM DetallesPedido dp
 RIGHT JOIN Productos p ON dp.producto_id = p.id
 WHERE dp.id IS NULL;
+```
 
---9. Mostrar el total de pedidos y ubicación de clientes usando múltiples JOIN .
+9. Mostrar el total de pedidos y ubicación de clientes usando múltiples JOIN .
+```sql
 SELECT c.nombre AS cliente, u.ciudad, COUNT(p.id) AS total_pedidos
 FROM Clientes c
 LEFT JOIN Pedidos p ON c.id = p.cliente_id
 LEFT JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id
 GROUP BY c.nombre, u.ciudad;
+```
 
---10. Unir Proveedores , Productos , y TiposProductos para un listado completo de inventario.
+10. Unir Proveedores , Productos , y TiposProductos para un listado completo de inventario.
+```sql
 SELECT pv.nombre AS proveedor, pr.nombre AS producto, tp.tipo_nombre AS tipo
 FROM Productos pr
 JOIN Proveedores pv ON pr.proveedor_id = pv.id
 JOIN TiposProductos tp ON pr.tipo_id = tp.id;
+```
 
---Consultas Simples
---1. Seleccionar todos los productos con precio mayor a $50.
+## Consultas Simples
+1. Seleccionar todos los productos con precio mayor a $50.
+```sql
 SELECT * FROM Productos WHERE precio > 50;
+```
 
---2. Consultar clientes registrados en una ciudad específica.
+2. Consultar clientes registrados en una ciudad específica.
+```sql
 SELECT c.nombre 
 FROM Clientes c
 JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id
 WHERE u.ciudad = 'Bucaramanga';
+```
 
---3. Mostrar empleados contratados en los últimos 2 años.
+3. Mostrar empleados contratados en los últimos 2 años.
+```sql
 SELECT nombre FROM DatosEmpleados 
 WHERE fecha_contratacion >= DATE_SUB(CURDATE(), INTERVAL 2 YEAR);
+```
 
---4. Seleccionar proveedores que suministran más de 5 productos.
+4. Seleccionar proveedores que suministran más de 5 productos.
+```sql
 SELECT p.nombre, COUNT(pr.id) AS total_productos
 FROM Proveedores p
 JOIN Productos pr ON p.id = pr.proveedor_id
 GROUP BY p.nombre
 HAVING COUNT(pr.id) > 5;
+```
 
---5. Listar clientes que no tienen dirección registrada en UbicacionCliente .
+5. Listar clientes que no tienen dirección registrada en UbicacionCliente .
+```sql
 SELECT c.nombre
 FROM Clientes c
 LEFT JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id
 WHERE u.id IS NULL;
+```
 
---6. Calcular el total de ventas por cada cliente.
+6. Calcular el total de ventas por cada cliente.
+```sql
 SELECT c.nombre, SUM(p.total) AS total_ventas
 FROM Clientes c
 LEFT JOIN Pedidos p ON c.id = p.cliente_id
 GROUP BY c.nombre;
+```
 
---7. Mostrar el salario promedio de los empleados.
+7. Mostrar el salario promedio de los empleados.
+```sql
 SELECT AVG(p.salario_base) AS salario_promedio
 FROM Puestos p
 JOIN DatosEmpleados e ON p.id = e.puesto_id;
+```
 
---8. Consultar el tipo de productos disponibles en TiposProductos .
+8. Consultar el tipo de productos disponibles en TiposProductos .
+```sql
 SELECT tipo_nombre FROM TiposProductos;
+```
 
---9. Seleccionar los 3 productos más caros.
+9. Seleccionar los 3 productos más caros.
+```sql
 SELECT nombre, precio FROM Productos
 ORDER BY precio DESC LIMIT 3;
+```
 
---10. Consultar el cliente con el mayor número de pedidos.
+10. Consultar el cliente con el mayor número de pedidos.
+```sql
 SELECT c.nombre, COUNT(p.id) AS total_pedidos
 FROM Clientes c
 JOIN Pedidos p ON c.id = p.cliente_id
 GROUP BY c.nombre
 ORDER BY total_pedidos DESC LIMIT 1;
+```
 
---Consultas Multitabla
---1. Listar todos los pedidos y el cliente asociado.
+## Consultas Multitabla
+1. Listar todos los pedidos y el cliente asociado.
+```sql
 SELECT p.id AS pedido_id, p.fecha, p.total, c.nombre AS cliente
 FROM Pedidos p
 JOIN Clientes c ON p.cliente_id = c.id;
+```
 
---2. Mostrar la ubicación de cada cliente en sus pedidos.
+2. Mostrar la ubicación de cada cliente en sus pedidos.
+```sql
 SELECT p.id AS pedido_id, c.nombre AS cliente, u.direccion, u.ciudad
 FROM Pedidos p
 JOIN Clientes c ON p.cliente_id = c.id
 JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id;
+```
 
---3. Listar productos junto con el proveedor y tipo de producto.
+3. Listar productos junto con el proveedor y tipo de producto.
+```sql
 SELECT pr.nombre AS producto, pv.nombre AS proveedor, tp.tipo_nombre AS tipo
 FROM Productos pr
 JOIN Proveedores pv ON pr.proveedor_id = pv.id
 JOIN TiposProductos tp ON pr.tipo_id = tp.id;
+```
 
---4. Consultar todos los empleados que gestionan pedidos de clientes en una ciudad específica.
+4. Consultar todos los empleados que gestionan pedidos de clientes en una ciudad específica.
+```sql
 SELECT DISTINCT e.nombre AS empleado
 FROM DatosEmpleados e
 JOIN Pedidos p ON e.id = p.cliente_id
 JOIN Clientes c ON p.cliente_id = c.id
 JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id
 WHERE u.ciudad = 'Bucaramanga';
+```
 
---5. Consultar los 5 productos más vendidos.
+5. Consultar los 5 productos más vendidos.
+```sql
 SELECT pr.nombre, SUM(dp.cantidad) AS total_vendido
 FROM Productos pr
 JOIN DetallesPedido dp ON pr.id = dp.producto_id
 GROUP BY pr.nombre
 ORDER BY total_vendido DESC LIMIT 5;
+```
 
---6. Obtener la cantidad total de pedidos por cliente y ciudad.
+6. Obtener la cantidad total de pedidos por cliente y ciudad.
+```sql
 SELECT c.nombre, u.ciudad, COUNT(p.id) AS total_pedidos
 FROM Clientes c
 JOIN Pedidos p ON c.id = p.cliente_id
 JOIN Ubicaciones u ON u.entidad = 'Cliente' AND u.entidad_id = c.id
 GROUP BY c.nombre, u.ciudad;
+```
 
---7. Listar clientes y proveedores en la misma ciudad.
+7. Listar clientes y proveedores en la misma ciudad.
+```sql
 SELECT c.id AS cliente_id, c.nombre AS cliente, 
        uc.ciudad AS ciudad_cliente,
        pv.id AS proveedor_id, pv.nombre AS proveedor
 FROM Clientes c
 INNER JOIN Ubicaciones uc ON uc.entidad = 'Cliente' AND uc.entidad_id = c.id
 INNER JOIN Ubicaciones up ON up.entidad = 'Proveedor' AND up.ciudad = uc.ciudad
-INNER JOIN Proveedores pv ON up.entidad_id = pv.id
+INNER JOIN Proveedores pv ON up.entidad_id = pv.id;
+```
 
---8. Mostrar el total de ventas agrupado por tipo de producto.
+8. Mostrar el total de ventas agrupado por tipo de producto.
+```sql
 SELECT tp.tipo_nombre, SUM(dp.cantidad * dp.precio_unitario) AS total_ventas
 FROM TiposProductos tp
 JOIN Productos pr ON tp.id = pr.tipo_id
 JOIN DetallesPedido dp ON pr.id = dp.producto_id
 GROUP BY tp.tipo_nombre;
+```
 
---9. Listar empleados que gestionan pedidos de productos de un proveedor específico.
+9. Listar empleados que gestionan pedidos de productos de un proveedor específico.
+```sql
 SELECT DISTINCT e.nombre AS empleado
 FROM DatosEmpleados e
 JOIN Pedidos p ON e.id = p.cliente_id
@@ -305,16 +394,20 @@ JOIN DetallesPedido dp ON p.id = dp.pedido_id
 JOIN Productos pr ON dp.producto_id = pr.id
 JOIN Proveedores pv ON pr.proveedor_id = pv.id
 WHERE pv.nombre = 'Electrónica';
+```
 
---10. Obtener el ingreso total de cada proveedor a partir de los productos vendidos.
+10. Obtener el ingreso total de cada proveedor a partir de los productos vendidos.
+```sql
 SELECT pv.nombre AS proveedor, SUM(dp.cantidad * dp.precio_unitario) AS ingreso_total
 FROM Proveedores pv
 JOIN Productos pr ON pv.id = pr.proveedor_id
 JOIN DetallesPedido dp ON pr.id = dp.producto_id
 GROUP BY pv.nombre;
+```
 
--- Subconsultas
---1. Consultar el producto más caro en cada categoría.
+## Subconsultas
+1. Consultar el producto más caro en cada categoría.
+```sql
 SELECT tp.tipo_nombre, p.nombre, p.precio
 FROM Productos p
 JOIN TiposProductos tp ON p.tipo_id = tp.id
@@ -323,41 +416,53 @@ WHERE p.precio = (
     FROM Productos 
     WHERE tipo_id = p.tipo_id
 );
+```
 
---2. Encontrar el cliente con mayor total en pedidos.
+2. Encontrar el cliente con mayor total en pedidos.
+```sql
 SELECT c.nombre, SUM(p.total) AS total_gastado
 FROM Clientes c
 JOIN Pedidos p ON c.id = p.cliente_id
 GROUP BY c.nombre
 ORDER BY total_gastado DESC LIMIT 1;
+```
 
---3. Listar empleados que ganan más que el salario promedio.
+3. Listar empleados que ganan más que el salario promedio.
+```sql
 SELECT e.nombre, pu.salario_base
 FROM DatosEmpleados e
 JOIN Puestos pu ON e.puesto_id = pu.id
 WHERE pu.salario_base > (
     SELECT AVG(salario_base) FROM Puestos
 );
+```
 
---4. Consultar productos que han sido pedidos más de 5 veces.
+4. Consultar productos que han sido pedidos más de 5 veces.
+```sql
 SELECT p.nombre, COUNT(dp.id) AS veces_pedido
 FROM Productos p
 JOIN DetallesPedido dp ON p.id = dp.producto_id
 GROUP BY p.nombre
 HAVING COUNT(dp.id) > 5;
+```
 
---5. Listar pedidos cuyo total es mayor al promedio de todos los pedidos.
+5. Listar pedidos cuyo total es mayor al promedio de todos los pedidos.
+```sql
 SELECT id, total FROM Pedidos
 WHERE total > (SELECT AVG(total) FROM Pedidos);
+```
 
---6. Seleccionar los 3 proveedores con más productos.
+6. Seleccionar los 3 proveedores con más productos.
+```sql
 SELECT p.nombre, COUNT(pr.id) AS total_productos
 FROM Proveedores p
 JOIN Productos pr ON p.id = pr.proveedor_id
 GROUP BY p.nombre
 ORDER BY total_productos DESC LIMIT 3;
+```
 
---7. Consultar productos con precio superior al promedio en su tipo.
+7. Consultar productos con precio superior al promedio en su tipo.
+```sql
 SELECT p.nombre, p.precio, tp.tipo_nombre
 FROM Productos p
 JOIN TiposProductos tp ON p.tipo_id = tp.id
@@ -366,8 +471,10 @@ WHERE p.precio > (
     FROM Productos 
     WHERE tipo_id = p.tipo_id
 );
+```
 
---8. Mostrar clientes que han realizado más pedidos que la media.
+8. Mostrar clientes que han realizado más pedidos que la media.
+```sql
 SELECT c.nombre, COUNT(p.id) AS total_pedidos
 FROM Clientes c
 JOIN Pedidos p ON c.id = p.cliente_id
@@ -380,12 +487,16 @@ HAVING COUNT(p.id) > (
         GROUP BY cliente_id
     ) AS promedio
 );
+```
 
---9. Encontrar productos cuyo precio es mayor que el promedio de todos los productos.
+9. Encontrar productos cuyo precio es mayor que el promedio de todos los productos.
+```sql
 SELECT nombre, precio FROM Productos
 WHERE precio > (SELECT AVG(precio) FROM Productos);
+```
 
---10. Mostrar empleados cuyo salario es menor al promedio del departamento.
+10. Mostrar empleados cuyo salario es menor al promedio del departamento.
+```sql
 SELECT e.nombre, p.salario_base, 
     (SELECT AVG(salario_base) FROM Puestos WHERE id = e.puesto_id) AS promedio_puesto
 FROM DatosEmpleados e
@@ -395,9 +506,11 @@ WHERE p.salario_base < (
     FROM Puestos 
     WHERE id = e.puesto_id
 );
+```
 
---Procedimientos Almacenados
---1. Crear un procedimiento para actualizar el precio de todos los productos de un proveedor.
+## Procedimientos Almacenados
+1. Crear un procedimiento para actualizar el precio de todos los productos de un proveedor.
+```sql
 DELIMITER //
 CREATE PROCEDURE actualizar_precios_proveedor(IN proveedor_id INT, IN porcentaje DECIMAL(5,2))
 BEGIN
@@ -406,8 +519,10 @@ BEGIN
     WHERE proveedor_id = proveedor_id;
 END //
 DELIMITER ;
+```
 
---2. Un procedimiento que devuelva la dirección de un cliente por ID.
+2. Un procedimiento que devuelva la dirección de un cliente por ID.
+```sql
 DELIMITER //
 CREATE PROCEDURE obtener_direccion_cliente(IN cliente_id INT)
 BEGIN
@@ -416,8 +531,10 @@ BEGIN
     WHERE entidad = 'Cliente' AND entidad_id = cliente_id;
 END //
 DELIMITER ;
+```
 
---3. Crear un procedimiento que registre un pedido nuevo y sus detalles.
+3. Crear un procedimiento que registre un pedido nuevo y sus detalles.
+```sql
 DELIMITER //
 CREATE PROCEDURE registrar_pedido(
     IN cliente_id INT,
@@ -444,8 +561,10 @@ BEGIN
     VALUES (pedido_id, 'Creado');
 END //
 DELIMITER ;
+```
 
---4. Un procedimiento para calcular el total de ventas de un cliente.
+4. Un procedimiento para calcular el total de ventas de un cliente.
+```sql
 DELIMITER //
 CREATE PROCEDURE total_ventas_cliente(IN cliente_id INT, OUT total DECIMAL(10,2))
 BEGIN
@@ -454,8 +573,10 @@ BEGIN
     WHERE cliente_id = cliente_id;
 END //
 DELIMITER ;
+```
 
---5. Crear un procedimiento para obtener los empleados por puesto.
+5. Crear un procedimiento para obtener los empleados por puesto.
+```sql
 DELIMITER //
 CREATE PROCEDURE empleados_por_puesto(IN puesto_nombre VARCHAR(50))
 BEGIN
@@ -465,8 +586,10 @@ BEGIN
     WHERE p.nombre = puesto_nombre;
 END //
 DELIMITER ;
+```
 
---6. Un procedimiento que actualice el salario de empleados por puesto.
+6. Un procedimiento que actualice el salario de empleados por puesto.
+```sql
 DELIMITER //
 CREATE PROCEDURE actualizar_salarios_puesto(
     IN puesto_nombre VARCHAR(50),
@@ -478,8 +601,10 @@ BEGIN
     WHERE nombre = puesto_nombre;
 END //
 DELIMITER ;
+```
 
---7. Crear un procedimiento que liste los pedidos entre dos fechas.
+7. Crear un procedimiento que liste los pedidos entre dos fechas.
+```sql
 DELIMITER //
 CREATE PROCEDURE pedidos_entre_fechas(IN fecha_inicio DATE, IN fecha_fin DATE)
 BEGIN
@@ -489,8 +614,10 @@ BEGIN
     WHERE p.fecha BETWEEN fecha_inicio AND fecha_fin;
 END //
 DELIMITER ;
+```
 
---8. Un procedimiento para aplicar un descuento a productos de una categoría.
+8. Un procedimiento para aplicar un descuento a productos de una categoría.
+```sql
 DELIMITER //
 CREATE PROCEDURE aplicar_descuento_categoria(
     IN tipo_id INT,
@@ -501,8 +628,10 @@ BEGIN
     WHERE tipo_id = tipo_id;
 END //
 DELIMITER ;
+```
 
---9. Crear un procedimiento que liste todos los proveedores de un tipo de producto.
+9. Crear un procedimiento que liste todos los proveedores de un tipo de producto.
+```sql
 DELIMITER //
 CREATE PROCEDURE proveedores_por_tipo(IN tipo_nombre VARCHAR(100))
 BEGIN
@@ -513,8 +642,10 @@ BEGIN
     WHERE tp.tipo_nombre = tipo_nombre;
 END //
 DELIMITER ;
+```
 
---10. Un procedimiento que devuelva el pedido de mayor valor.
+10. Un procedimiento que devuelva el pedido de mayor valor.
+```sql
 DELIMITER //
 CREATE PROCEDURE pedido_mayor_valor()
 BEGIN
@@ -524,9 +655,11 @@ BEGIN
     ORDER BY p.total DESC LIMIT 1;
 END //
 DELIMITER ;
+```
 
---Funciones Definidas por el Usuario
---1. Crear una función que reciba una fecha y devuelva los días transcurridos.
+## Funciones Definidas por el Usuario
+1. Crear una función que reciba una fecha y devuelva los días transcurridos.
+```sql
 DELIMITER //
 CREATE FUNCTION dias_transcurridos(fecha DATE) RETURNS INT
 DETERMINISTIC
@@ -534,8 +667,10 @@ BEGIN
     RETURN DATEDIFF(CURDATE(), fecha);
 END //
 DELIMITER ;
+```
 
---2. Crear una función para calcular el total con impuesto de un monto.
+2. Crear una función para calcular el total con impuesto de un monto.
+```sql
 DELIMITER //
 CREATE FUNCTION calcular_total_con_impuesto(monto DECIMAL(10,2), tasa DECIMAL(5,2)) 
 RETURNS DECIMAL(10,2)
@@ -544,8 +679,10 @@ BEGIN
     RETURN monto * (1 + tasa / 100);
 END //
 DELIMITER ;
+```
 
---3. Una función que devuelva el total de pedidos de un cliente específico.
+3. Una función que devuelva el total de pedidos de un cliente específico.
+```sql
 DELIMITER //
 CREATE FUNCTION total_pedidos_cliente(cliente_id INT) RETURNS INT
 READS SQL DATA
@@ -555,8 +692,10 @@ BEGIN
     RETURN total;
 END //
 DELIMITER ;
+```
 
---4. Crear una función para aplicar un descuento a un producto.
+4. Crear una función para aplicar un descuento a un producto.
+```sql
 DELIMITER //
 CREATE FUNCTION aplicar_descuento(precio_original DECIMAL(10,2), descuento DECIMAL(5,2)) 
 RETURNS DECIMAL(10,2)
@@ -565,8 +704,10 @@ BEGIN
     RETURN precio_original * (1 - descuento / 100);
 END //
 DELIMITER ;
+```
 
---5. Una función que indique si un cliente tiene dirección registrada.
+5. Una función que indique si un cliente tiene dirección registrada.
+```sql
 DELIMITER //
 CREATE FUNCTION tiene_direccion(cliente_id INT) RETURNS BOOLEAN
 READS SQL DATA
@@ -577,8 +718,10 @@ BEGIN
     RETURN existe > 0;
 END //
 DELIMITER ;
+```
 
---6. Crear una función que devuelva el salario anual de un empleado.
+6. Crear una función que devuelva el salario anual de un empleado.
+```sql
 DELIMITER //
 CREATE FUNCTION salario_anual(empleado_id INT) RETURNS DECIMAL(10,2)
 READS SQL DATA
@@ -591,8 +734,10 @@ BEGIN
     RETURN salario;
 END //
 DELIMITER ;
+```
 
---7. Una función para calcular el total de ventas de un tipo de producto.
+7. Una función para calcular el total de ventas de un tipo de producto.
+```sql
 DELIMITER //
 CREATE FUNCTION ventas_por_tipo(tipo_id INT) RETURNS DECIMAL(10,2)
 READS SQL DATA
@@ -605,8 +750,10 @@ BEGIN
     RETURN IFNULL(total, 0);
 END //
 DELIMITER ;
+```
 
---8. Crear una función para devolver el nombre de un cliente por ID.
+8. Crear una función para devolver el nombre de un cliente por ID.
+```sql
 DELIMITER //
 CREATE FUNCTION nombre_cliente(cliente_id INT) RETURNS VARCHAR(100)
 READS SQL DATA
@@ -616,8 +763,10 @@ BEGIN
     RETURN nombre_cliente;
 END //
 DELIMITER ;
+```
 
---9. Una función que reciba el ID de un pedido y devuelva su total.
+9. Una función que reciba el ID de un pedido y devuelva su total.
+```sql
 DELIMITER //
 CREATE FUNCTION total_pedido(pedido_id INT) RETURNS DECIMAL(10,2)
 READS SQL DATA
@@ -627,8 +776,10 @@ BEGIN
     RETURN total;
 END //
 DELIMITER ;
+```
 
---10. Crear una función que indique si un producto está en inventario.
+10. Crear una función que indique si un producto está en inventario.
+```sql
 DELIMITER //
 CREATE FUNCTION producto_en_inventario(producto_id INT) RETURNS BOOLEAN
 READS SQL DATA
@@ -638,9 +789,11 @@ BEGIN
     RETURN existe > 0;
 END //
 DELIMITER ;
+```
 
---Triggers
---1. Crear un trigger que registre en HistorialSalarios cada cambio de salario de empleados.
+## Triggers
+1. Crear un trigger que registre en HistorialSalarios cada cambio de salario de empleados.
+```sql
 DELIMITER //
 CREATE TRIGGER registrar_cambio_salario
 AFTER UPDATE ON Puestos
@@ -652,8 +805,10 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+```
 
---2. Crear un trigger que evite borrar productos con pedidos activos.
+2. Crear un trigger que evite borrar productos con pedidos activos.
+```sql
 DELIMITER //
 CREATE TRIGGER evitar_borrado_producto
 BEFORE DELETE ON Productos
@@ -666,8 +821,10 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+```
 
---3. Un trigger que registre en HistorialPedidos cada actualización en Pedidos .
+3. Un trigger que registre en HistorialPedidos cada actualización en Pedidos .
+```sql
 DELIMITER //
 CREATE TRIGGER registrar_actualizacion_pedido
 AFTER UPDATE ON Pedidos
@@ -677,21 +834,24 @@ BEGIN
     VALUES (NEW.id, 'Actualizado', NOW());
 END //
 DELIMITER ;
+```
 
---4. Crear un trigger que actualice el inventario al registrar un pedido.
+4. Crear un trigger que actualice el inventario al registrar un pedido.
+```sql
 DELIMITER //
 CREATE TRIGGER actualizar_inventario
 AFTER INSERT ON DetallesPedido
 FOR EACH ROW
 BEGIN
-    -- Asumiendo que hay una tabla Inventario
     UPDATE Inventario 
     SET cantidad = cantidad - NEW.cantidad
     WHERE producto_id = NEW.producto_id;
 END //
 DELIMITER ;
+```
 
---5. Un trigger que evite actualizaciones de precio a menos de $1.
+5. Un trigger que evite actualizaciones de precio a menos de $1.
+```sql
 DELIMITER //
 CREATE TRIGGER validar_precio_minimo
 BEFORE UPDATE ON Productos
@@ -702,8 +862,10 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+```
 
---6. Crear un trigger que registre la fecha de creación de un pedido en HistorialPedidos .
+6. Crear un trigger que registre la fecha de creación de un pedido en HistorialPedidos .
+```sql
 DELIMITER //
 CREATE TRIGGER registrar_creacion_pedido
 AFTER INSERT ON Pedidos
@@ -713,8 +875,10 @@ BEGIN
     VALUES (NEW.id, 'Creado', NOW());
 END //
 DELIMITER ;
+```
 
---7. Un trigger que mantenga el precio total de cada pedido en Pedidos .
+7. Un trigger que mantenga el precio total de cada pedido en Pedidos .
+```sql
 DELIMITER //
 CREATE TRIGGER actualizar_total_pedido
 AFTER INSERT ON DetallesPedido
@@ -730,8 +894,10 @@ BEGIN
     WHERE id = NEW.pedido_id;
 END //
 DELIMITER ;
+```
 
---8. Crear un trigger para validar que UbicacionCliente no esté vacío al crear un cliente.
+8. Crear un trigger para validar que UbicacionCliente no esté vacío al crear un cliente.
+```sql
 DELIMITER //
 CREATE TRIGGER validar_ubicacion_cliente
 AFTER INSERT ON Clientes
@@ -747,8 +913,10 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+```
 
---9. Un trigger que registre en LogActividades cada modificación en Proveedores .
+9. Un trigger que registre en LogActividades cada modificación en Proveedores .
+```sql
 DELIMITER //
 CREATE TRIGGER registrar_modificacion_proveedor
 AFTER UPDATE ON Proveedores
@@ -758,8 +926,10 @@ BEGIN
     VALUES ('Proveedores', 'Actualización', NEW.id, NOW());
 END //
 DELIMITER ;
+```
 
---10. Crear un trigger que registre en HistorialContratos cada cambio en Empleados .
+10. Crear un trigger que registre en HistorialContratos cada cambio en Empleados .
+```sql
 DELIMITER //
 CREATE TRIGGER registrar_cambio_contrato
 AFTER UPDATE ON DatosEmpleados
@@ -771,3 +941,4 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+```
