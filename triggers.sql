@@ -1,5 +1,0 @@
---Ejercicio 1: Crear un Trigger AFTER INSERT para Auditoría de Salarios
---Ejercicio 2: Crear un Trigger BEFORE UPDATE para Validar Aumento de Salario
---Ejercicio 3: Crear un Trigger AFTER UPDATE para Registrar Cambios en el Salario
---Ejercicio 4: Crear un Trigger AFTER DELETE para Manejar la Eliminación de Salarios
---Ejercicio Final: Crear un Reporte de Auditoría Completo
